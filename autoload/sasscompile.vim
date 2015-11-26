@@ -49,17 +49,16 @@ function! sasscompile#CompassConfig()
 endfunction
 
 function! sasscompile#SassCompile()
+    let cdir = getcwd()
     let fdir = expand('%:p:h')
     let compassconf = searchparent#File('config.rb')
     let cmd = ''
     let compassFlg = 0
-    " echomsg fdir
 
     if compassconf != ''
         if readfile(compassconf)[0] != '# auto-compile stopped.'
             let dir = fnamemodify(compassconf, ':h')
             exec 'silent cd '.dir
-            " let cmd = system('which compass').' compile'
             let cmd = 'compass compile &'
         endif
     else
@@ -78,6 +77,7 @@ function! sasscompile#SassCompile()
         endif
 
         redir @a
+            " echomsg cmd
             call system(cmd)
         redir END
 
@@ -85,7 +85,7 @@ function! sasscompile#SassCompile()
         " copen
     endif
 
-    exec 'silent cd '.fdir
+    exec 'silent cd '.cdir
 endfunction
 
 let &cpo = s:save_cpo
