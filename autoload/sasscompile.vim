@@ -15,6 +15,9 @@ endif
 if !exists("g:sass_compile_cssdir")
     let g:sass_compile_cssdir = ['css', 'css']
 endif
+if !exists("g:sass_compile_sourcemap")
+    let g:sass_compile_sourcemap = 1
+endif
 if !exists("g:sass_compile_beforecmd")
     let g:sass_compile_beforecmd = ''
 endif
@@ -42,9 +45,10 @@ endfunction
 
 function! sasscompile#CompassConfig()
     let confile = searchparent#File('config.rb')
-
     if confile != ''
         exec 'e '.confile
+    else
+        echomsg "sass config not found."
     endif
 endfunction
 
@@ -59,12 +63,12 @@ function! sasscompile#SassCompile()
         if readfile(compassconf)[0] != '# auto-compile stopped.'
             let dir = fnamemodify(compassconf, ':h')
             exec 'silent cd '.dir
-            let cmd = 'compass compile &'
+            let cmd = 'compass compile '.(g:sass_compile_sourcemap ? '--sourcemap' : '--no-sourcemap').' &'
         endif
     else
         let dir = searchparent#Dir(g:sass_compile_cssdir)
         if dir != ''
-            let cmd = 'sass --update --sourcemap=none '.fdir.':'.dir . ' &'
+            let cmd = 'sass --update --sourcemap='.((g:sass_compile_sourcemap ? 'auto' : 'none')).' '.fdir.':'.dir . ' &'
         endif
     endif
 
@@ -77,7 +81,7 @@ function! sasscompile#SassCompile()
         endif
 
         redir @a
-            " echomsg cmd
+            echomsg cmd
             call system(cmd)
         redir END
 
